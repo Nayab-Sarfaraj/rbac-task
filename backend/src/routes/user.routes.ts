@@ -12,13 +12,12 @@ import {
 
 const router = Router();
 
-// Apply authentication and Admin role checks globally on this router
+// Apply authentication globally on this router
 router.use(authenticate);
-router.use(authorize(['admin']));
 
-router.get('/', validate(getUsersSchema), userHandler.getUsers);
-router.get('/:id', validate(getUserByIdSchema), userHandler.getUserById);
-router.patch('/:id/role', validate(updateUserRoleSchema), userHandler.updateUserRole);
-router.patch('/:id/deactivate', validate(deactivateUserSchema), userHandler.deactivateUser);
+router.get('/', authorize(['admin', 'manager']), validate(getUsersSchema), userHandler.getUsers);
+router.get('/:id', authorize(['admin', 'manager']), validate(getUserByIdSchema), userHandler.getUserById);
+router.patch('/:id/role', authorize(['admin']), validate(updateUserRoleSchema), userHandler.updateUserRole);
+router.patch('/:id/deactivate', authorize(['admin']), validate(deactivateUserSchema), userHandler.deactivateUser);
 
 export default router;

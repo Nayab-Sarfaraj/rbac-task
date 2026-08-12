@@ -8,7 +8,8 @@
     "build": "npm run clean && tsc",
     "start": "node dist/server.js",
     "seed": "ts-node-dev src/scripts/seed.ts",
-    "test": "jest --runInBand --detectOpenHandles"
+    "test": "jest --runInBand --detectOpenHandles",
+    "lint": "eslint src/**/*.ts"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +38,9 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.2.0",
     "@types/supertest": "^7.2.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
     "jest": "^30.4.2",
     "rimraf": "^6.1.3",
     "supertest": "^7.2.2",

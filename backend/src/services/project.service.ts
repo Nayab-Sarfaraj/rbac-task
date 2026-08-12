@@ -29,25 +29,14 @@ export class ProjectService {
   private verifyProjectAccess(project: IProject, user: UserPayload): void {
     if (user.role === 'admin') return;
 
-    // Owner may be a populated User object or a raw ObjectId
-    const ownerId =
-      project.owner && typeof project.owner === 'object' && '_id' in project.owner
-        ? (project.owner as any)._id.toString()
-        : project.owner.toString();
+    const ownerId = toId(project.owner);
 
     if (user.role === 'manager') {
       if (ownerId !== user.id) {
         throw new ForbiddenError('Access Denied: You do not own this project');
       }
     } else {
-      // member role — members may be populated User objects or raw ObjectIds
-      const isMember = project.members.some((m: any) => {
-        const memberId =
-          m && typeof m === 'object' && '_id' in m
-            ? m._id.toString()
-            : m.toString();
-        return memberId === user.id;
-      });
+      const isMember = project.members.some((m: any) => toId(m) === user.id);
       if (!isMember) {
         throw new ForbiddenError('Access Denied: You are not a member of this project');
       }

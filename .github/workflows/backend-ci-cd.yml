@@ -53,6 +53,10 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          MONGO_URI: mongodb://localhost:27017/test
+          JWT_ACCESS_SECRET: dummy_access_secret
+          JWT_REFRESH_SECRET: dummy_refresh_secret
 
   deploy:
     name: Continuous Deployment

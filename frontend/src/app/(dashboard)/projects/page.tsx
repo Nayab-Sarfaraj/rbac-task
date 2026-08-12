@@ -174,7 +174,7 @@ export default function ProjectsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projects.map((project) => {
+                {projects.map((project: any) => {
                   const ownerName =
                     typeof project.owner === "object"
                       ? project.owner.name

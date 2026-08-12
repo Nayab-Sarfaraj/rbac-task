@@ -347,7 +347,7 @@ export default function ProjectDetailsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tasks.map((task) => (
+                    {tasks.map((task: any) => (
                       <TableRow key={task._id}>
                         <TableCell className="font-semibold">{task.title}</TableCell>
                         <TableCell>{task.assignee?.name || "Unassigned"}</TableCell>
@@ -395,28 +395,30 @@ export default function ProjectDetailsPage() {
                   )
                 );
                 const availableUsers = (usersData?.users || []).filter(
-                  (u) => !existingIds.has(u._id) && !u.isDeleted
+                  (u: any) => !existingIds.has(u._id) && !u.isDeleted
                 );
                 return (
                   <div className="flex gap-2">
                     <Popover open={memberPickerOpen} onOpenChange={setMemberPickerOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className="flex-1 justify-between text-sm font-normal"
-                        >
-                          {selectedMember ? selectedMember.name : "Search and select a user..."}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
+                      <PopoverTrigger
+                        render={
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="flex-1 justify-between text-sm font-normal"
+                          >
+                            {selectedMember ? selectedMember.name : "Search and select a user..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        }
+                      />
                       <PopoverContent className="w-[300px] p-0" align="start">
                         <Command>
                           <CommandInput placeholder="Search users..." />
                           <CommandList>
                             <CommandEmpty>No users found.</CommandEmpty>
                             <CommandGroup>
-                              {availableUsers.map((u) => (
+                              {availableUsers.map((u: any) => (
                                 <CommandItem
                                   key={u._id}
                                   value={u.name}

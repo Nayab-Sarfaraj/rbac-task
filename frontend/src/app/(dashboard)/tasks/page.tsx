@@ -235,7 +235,7 @@ export default function TasksPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tasks.map((task) => {
+                {tasks.map((task: any) => {
                   const isTaskAssignee = task.assignee?._id === user?.id;
                   const canChangeStatus = isAdminOrManager || isTaskAssignee;
                   const projectTitle = typeof task.project === "object" ? task.project.title : "Unknown Project";

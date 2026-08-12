@@ -1,0 +1,9 @@
+node_modules
+dist
+npm-debug.log
+.git
+.dockerignore
+Dockerfile
+jest.config.js
+coverage
+.env

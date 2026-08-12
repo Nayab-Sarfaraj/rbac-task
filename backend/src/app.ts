@@ -21,7 +21,10 @@ const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: true, // Configurable or true for simplicity in testing
+    origin: [
+      'http://localhost:3000',
+      'https://rbac-task.vercel.app',
+    ],
     credentials: true,
   })
 );

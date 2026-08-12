@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Edit, Trash2, Eye } from "lucide-react";
+import { Search, Trash2, Eye } from "lucide-react";
 import { Task } from "@/hooks/use-tasks";
 
 export default function TasksPage() {
@@ -40,7 +40,6 @@ export default function TasksPage() {
   // Filters State
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState(""); // extra filter
   const [assigneeFilter, setAssigneeFilter] = useState("");
   const [dueDateFilter, setDueDateFilter] = useState("");
 
@@ -235,7 +234,7 @@ export default function TasksPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tasks.map((task: any) => {
+                {tasks.map((task: Task) => {
                   const isTaskAssignee = task.assignee?._id === user?.id;
                   const canChangeStatus = isAdminOrManager || isTaskAssignee;
                   const projectTitle = typeof task.project === "object" ? task.project.title : "Unknown Project";

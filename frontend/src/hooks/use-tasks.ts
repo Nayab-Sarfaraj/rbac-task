@@ -87,7 +87,7 @@ export function useCreateTask() {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Task created successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -117,7 +117,7 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ["task", data._id] });
       toast.success("Task updated successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -135,7 +135,7 @@ export function useUpdateTaskStatus() {
       queryClient.invalidateQueries({ queryKey: ["task", data._id] });
       toast.success("Task status updated");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -151,7 +151,7 @@ export function useDeleteTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Task deleted successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });

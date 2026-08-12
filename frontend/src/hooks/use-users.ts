@@ -45,7 +45,7 @@ export function useUpdateUserRole() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("User role updated successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -62,7 +62,7 @@ export function useDeactivateUser() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("User deactivated successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });

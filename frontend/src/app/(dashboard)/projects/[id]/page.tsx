@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import {
   useProject,
@@ -9,8 +9,8 @@ import {
   useAddProjectMember,
   useRemoveProjectMember,
 } from "@/hooks/use-projects";
-import { useTasks, useCreateTask, useDeleteTask } from "@/hooks/use-tasks";
-import { useUsers } from "@/hooks/use-users";
+import { useTasks, useCreateTask, useDeleteTask, Task } from "@/hooks/use-tasks";
+import { useUsers, User } from "@/hooks/use-users";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
@@ -47,13 +47,11 @@ import {
 } from "@/components/ui/command";
 import { ArrowLeft, UserPlus, Trash2, Plus, Edit3, ChevronsUpDown, Check } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams() as { id: string };
   const { user } = useAuth();
-  const router = useRouter();
 
   const { data: project, isLoading: loadingProject } = useProject(id);
   const { data: tasksData, isLoading: loadingTasks } = useTasks(1, 50, { projectId: id });
@@ -347,7 +345,7 @@ export default function ProjectDetailsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tasks.map((task: any) => (
+                    {tasks.map((task: Task) => (
                       <TableRow key={task._id}>
                         <TableCell className="font-semibold">{task.title}</TableCell>
                         <TableCell>{task.assignee?.name || "Unassigned"}</TableCell>
@@ -390,12 +388,12 @@ export default function ProjectDetailsPage() {
             <CardContent className="space-y-4">
               {canManage && (() => {
                 const existingIds = new Set(
-                  (project.members || []).map((m: any) =>
+                  (project.members || []).map((m: { _id: string } | string) =>
                     typeof m === "object" ? m._id : m
                   )
                 );
                 const availableUsers = (usersData?.users || []).filter(
-                  (u: any) => !existingIds.has(u._id) && !u.isDeleted
+                  (u: User) => !existingIds.has(u._id) && !u.isDeleted
                 );
                 return (
                   <div className="flex gap-2">
@@ -418,7 +416,7 @@ export default function ProjectDetailsPage() {
                           <CommandList>
                             <CommandEmpty>No users found.</CommandEmpty>
                             <CommandGroup>
-                              {availableUsers.map((u: any) => (
+                              {availableUsers.map((u: User) => (
                                 <CommandItem
                                   key={u._id}
                                   value={u.name}

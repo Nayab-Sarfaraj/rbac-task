@@ -60,7 +60,7 @@ export function useCreateProject() {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Project created successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -78,7 +78,7 @@ export function useUpdateProject(id: string) {
       queryClient.invalidateQueries({ queryKey: ["project", id] });
       toast.success("Project updated successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -94,7 +94,7 @@ export function useDeleteProject() {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Project deleted successfully");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -111,7 +111,7 @@ export function useAddProjectMember(projectId: string) {
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
       toast.success("Member added to project");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });
@@ -127,7 +127,7 @@ export function useRemoveProjectMember(projectId: string) {
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
       toast.success("Member removed from project");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(formatError(err));
     },
   });

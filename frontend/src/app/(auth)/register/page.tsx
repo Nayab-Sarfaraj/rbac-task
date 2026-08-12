@@ -45,7 +45,7 @@ export default function RegisterPage() {
       const { accessToken, user } = loginRes.data.data;
       login(accessToken, user);
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err) {
       toast.error(formatError(err));
     } finally {
       setLoading(false);

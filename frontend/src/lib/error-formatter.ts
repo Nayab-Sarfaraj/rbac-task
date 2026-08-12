@@ -1,5 +1,18 @@
-export function formatError(err: any): string {
-  const data = err.response?.data;
+export function formatError(err: unknown): string {
+  const errorObj = err as {
+    response?: {
+      data?: {
+        error?: {
+          body?: Record<string, { _errors?: string[] }>;
+          query?: Record<string, { _errors?: string[] }>;
+        };
+        message?: string;
+      };
+    };
+    message?: string;
+  };
+
+  const data = errorObj.response?.data;
 
   // Handle nested validation errors (Zod structure)
   if (data?.error?.body) {
@@ -32,5 +45,5 @@ export function formatError(err: any): string {
     }
   }
 
-  return data?.message || err.message || "An unexpected error occurred";
+  return data?.message || errorObj.message || "An unexpected error occurred";
 }

@@ -48,7 +48,7 @@ export interface DashboardStats {
     action: string;
     targetType: string;
     targetId: string;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
     createdAt: string;
   }>;
 }

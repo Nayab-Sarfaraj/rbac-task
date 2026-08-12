@@ -33,7 +33,7 @@ function LoginForm() {
       login(accessToken, user);
       toast.success("Welcome back!");
       router.push(redirectPath);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(formatError(err));
     } finally {
       setLoading(false);

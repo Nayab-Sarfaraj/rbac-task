@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         name: storedName || payload.email.split("@")[0],
       });
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   };
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       window.removeEventListener("auth-logout", handleLogoutEvent);
     };
-  }, []);
+  }, [router]);
 
   return (
     <AuthContext.Provider

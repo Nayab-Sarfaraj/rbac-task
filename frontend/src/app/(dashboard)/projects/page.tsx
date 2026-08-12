@@ -7,6 +7,7 @@ import {
   useProjects,
   useCreateProject,
   useDeleteProject,
+  Project,
 } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -174,7 +175,7 @@ export default function ProjectsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projects.map((project: any) => {
+                {projects.map((project: Project) => {
                   const ownerName =
                     typeof project.owner === "object"
                       ? project.owner.name

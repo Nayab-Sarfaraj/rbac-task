@@ -4,7 +4,7 @@ import React from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useDashboardStats } from "@/hooks/use-dashboard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FolderKanban, CheckSquare, Users as UsersIcon, AlertTriangle, Activity, User as UserIcon, Layers } from "lucide-react";
+import { FolderKanban, Users as UsersIcon, AlertTriangle, Activity, User as UserIcon, Layers } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -97,7 +97,20 @@ export default function DashboardPage() {
   const projectInProgress = stats?.projectTasks?.statusSummary?.in_progress || 0;
   const projectDone = stats?.projectTasks?.statusSummary?.done || 0;
   const projectOverdue = stats?.projectTasks?.overdue || [];
-  const projectUpcoming = stats?.projectTasks?.upcoming || [];
+
+  interface DashboardTaskItem {
+    _id: string;
+    title: string;
+    dueDate?: string;
+    status: string;
+    priority: string;
+    assignee?: {
+      _id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+  }
 
   return (
     <div className="space-y-6">
@@ -335,7 +348,7 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="space-y-3">
                   {projectOverdue.length > 0 ? (
-                    projectOverdue.slice(0, 5).map((t: any) => (
+                    projectOverdue.slice(0, 5).map((t: DashboardTaskItem) => (
                       <div key={t._id} className="flex justify-between items-center text-sm border-b border-border pb-2 last:border-0 last:pb-0">
                         <div className="min-w-0">
                           <p className="font-semibold truncate">{t.title}</p>
@@ -454,7 +467,7 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="space-y-3">
                   {personalUpcoming.length > 0 ? (
-                    personalUpcoming.map((t: any) => (
+                    personalUpcoming.map((t: DashboardTaskItem) => (
                       <div key={t._id} className="flex justify-between items-center text-sm border-b border-border pb-2 last:border-0 last:pb-0">
                         <span className="font-medium truncate">{t.title}</span>
                         <span className="text-xs text-muted-foreground font-semibold">

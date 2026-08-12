@@ -13,7 +13,6 @@ import {
   FileClock,
   LogOut,
   X,
-  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

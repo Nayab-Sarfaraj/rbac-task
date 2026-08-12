@@ -10,7 +10,9 @@ import {
   useRemoveProjectMember,
 } from "@/hooks/use-projects";
 import { useTasks, useCreateTask, useDeleteTask } from "@/hooks/use-tasks";
+import { useUsers } from "@/hooks/use-users";
 import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -30,9 +32,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ArrowLeft, UserPlus, Trash2, Plus, Edit3 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { ArrowLeft, UserPlus, Trash2, Plus, Edit3, ChevronsUpDown, Check } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams() as { id: string };
@@ -41,6 +57,7 @@ export default function ProjectDetailsPage() {
 
   const { data: project, isLoading: loadingProject } = useProject(id);
   const { data: tasksData, isLoading: loadingTasks } = useTasks(1, 50, { projectId: id });
+  const { data: usersData } = useUsers(1, 50, {}, true);
 
   // Mutations
   const updateProjectMutation = useUpdateProject(id);
@@ -55,7 +72,8 @@ export default function ProjectDetailsPage() {
   const [editDescription, setEditDescription] = useState("");
 
   // Add Member State
-  const [memberUserId, setMemberUserId] = useState("");
+  const [memberPickerOpen, setMemberPickerOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<{ id: string; name: string } | null>(null);
 
   // Create Task States
   const [isTaskOpen, setIsTaskOpen] = useState(false);
@@ -64,6 +82,10 @@ export default function ProjectDetailsPage() {
   const [taskPriority, setTaskPriority] = useState("medium");
   const [taskAssigneeId, setTaskAssigneeId] = useState("");
   const [taskDueDate, setTaskDueDate] = useState("");
+
+  // Confirmation dialog states
+  const [removeMemberId, setRemoveMemberId] = useState<string | null>(null);
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
 
   if (loadingProject) {
     return (
@@ -78,7 +100,7 @@ export default function ProjectDetailsPage() {
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">Project not found or deleted.</p>
         <Link href="/projects">
-          <Button variant="outline" gap-1>
+          <Button variant="outline" className="flex items-center gap-1">
             <ArrowLeft className="size-4" />
             Back to Projects
           </Button>
@@ -103,18 +125,15 @@ export default function ProjectDetailsPage() {
     setIsEditOpen(false);
   };
 
-  const handleAddMemberSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!memberUserId.trim()) return;
-
-    await addMemberMutation.mutateAsync(memberUserId);
-    setMemberUserId("");
+  const handleAddMember = async () => {
+    if (!selectedMember) return;
+    await addMemberMutation.mutateAsync(selectedMember.id);
+    setSelectedMember(null);
   };
 
-  const handleRemoveMember = async (memberId: string) => {
-    if (confirm("Are you sure you want to remove this member from the project?")) {
-      await removeMemberMutation.mutateAsync(memberId);
-    }
+
+  const handleRemoveMember = (memberId: string) => {
+    setRemoveMemberId(memberId);
   };
 
   const handleCreateTaskSubmit = async (e: React.FormEvent) => {
@@ -138,10 +157,8 @@ export default function ProjectDetailsPage() {
     setTaskDueDate("");
   };
 
-  const handleDeleteTask = async (taskId: string) => {
-    if (confirm("Are you sure you want to delete this task?")) {
-      await deleteTaskMutation.mutateAsync(taskId);
-    }
+  const handleDeleteTask = (taskId: string) => {
+    setDeleteTaskId(taskId);
   };
 
   const openEditDialog = () => {
@@ -174,14 +191,14 @@ export default function ProjectDetailsPage() {
           {/* Action buttons for owner/admin */}
           {canManage && (
             <div className="flex gap-2">
-              <Button variant="outline" gap-1 onClick={openEditDialog}>
+              <Button variant="outline" className="flex items-center gap-1" onClick={openEditDialog}>
                 <Edit3 className="size-4" />
                 Edit Details
               </Button>
 
               <Dialog open={isTaskOpen} onOpenChange={setIsTaskOpen}>
                 <DialogTrigger render={
-                  <Button gap-1>
+                  <Button className="flex items-center gap-1">
                     <Plus className="size-4" />
                     Add Task
                   </Button>
@@ -371,19 +388,71 @@ export default function ProjectDetailsPage() {
               <CardDescription>Users assigned to this project workspace</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {canManage && (
-                <form onSubmit={handleAddMemberSubmit} className="flex gap-2">
-                  <Input
-                    placeholder="Enter MongoDB User ID..."
-                    value={memberUserId}
-                    onChange={(e) => setMemberUserId(e.target.value)}
-                    required
-                  />
-                  <Button type="submit" size="icon" disabled={addMemberMutation.isPending}>
-                    <UserPlus className="size-4" />
-                  </Button>
-                </form>
-              )}
+              {canManage && (() => {
+                const existingIds = new Set(
+                  (project.members || []).map((m: any) =>
+                    typeof m === "object" ? m._id : m
+                  )
+                );
+                const availableUsers = (usersData?.users || []).filter(
+                  (u) => !existingIds.has(u._id) && !u.isDeleted
+                );
+                return (
+                  <div className="flex gap-2">
+                    <Popover open={memberPickerOpen} onOpenChange={setMemberPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className="flex-1 justify-between text-sm font-normal"
+                        >
+                          {selectedMember ? selectedMember.name : "Search and select a user..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[300px] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search users..." />
+                          <CommandList>
+                            <CommandEmpty>No users found.</CommandEmpty>
+                            <CommandGroup>
+                              {availableUsers.map((u) => (
+                                <CommandItem
+                                  key={u._id}
+                                  value={u.name}
+                                  onSelect={() => {
+                                    setSelectedMember({ id: u._id, name: u.name });
+                                    setMemberPickerOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedMember?.id === u._id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{u.name}</span>
+                                    <span className="text-xs text-muted-foreground">{u.email} · {u.role}</span>
+                                  </div>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <Button
+                      type="button"
+                      size="icon"
+                      disabled={!selectedMember || addMemberMutation.isPending}
+                      onClick={handleAddMember}
+                    >
+                      <UserPlus className="size-4" />
+                    </Button>
+                  </div>
+                );
+              })()}
 
               <div className="space-y-2">
                 {project.members && project.members.length > 0 ? (
@@ -462,6 +531,36 @@ export default function ProjectDetailsPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog
+        isOpen={!!removeMemberId}
+        onClose={() => setRemoveMemberId(null)}
+        onConfirm={async () => {
+          if (removeMemberId) {
+            await removeMemberMutation.mutateAsync(removeMemberId);
+          }
+        }}
+        title="Remove Member"
+        description="Are you sure you want to remove this member from the project?"
+        confirmText="Remove"
+        variant="destructive"
+        isPending={removeMemberMutation.isPending}
+      />
+
+      <ConfirmationDialog
+        isOpen={!!deleteTaskId}
+        onClose={() => setDeleteTaskId(null)}
+        onConfirm={async () => {
+          if (deleteTaskId) {
+            await deleteTaskMutation.mutateAsync(deleteTaskId);
+          }
+        }}
+        title="Delete Task"
+        description="Are you sure you want to delete this task? This action cannot be undone."
+        confirmText="Delete"
+        variant="destructive"
+        isPending={deleteTaskMutation.isPending}
+      />
     </div>
   );
 }

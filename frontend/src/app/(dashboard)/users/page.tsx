@@ -11,6 +11,7 @@ import {
 } from "@/hooks/use-users";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import {
   Table,
   TableBody,
@@ -43,10 +44,10 @@ export default function UsersPage() {
     await updateRoleMutation.mutateAsync({ id: userId, role: newRole });
   };
 
-  const handleDeactivate = async (userId: string) => {
-    if (confirm("Are you sure you want to deactivate this user? This will soft-delete their profile.")) {
-      await deactivateUserMutation.mutateAsync(userId);
-    }
+  const [deactivateUserId, setDeactivateUserId] = useState<string | null>(null);
+
+  const handleDeactivate = (userId: string) => {
+    setDeactivateUserId(userId);
   };
 
   const users = data?.users || [];
@@ -208,6 +209,21 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+
+      <ConfirmationDialog
+        isOpen={!!deactivateUserId}
+        onClose={() => setDeactivateUserId(null)}
+        onConfirm={async () => {
+          if (deactivateUserId) {
+            await deactivateUserMutation.mutateAsync(deactivateUserId);
+          }
+        }}
+        title="Deactivate User"
+        description="Are you sure you want to deactivate this user? This will soft-delete their profile and they will lose access."
+        confirmText="Deactivate"
+        variant="destructive"
+        isPending={deactivateUserMutation.isPending}
+      />
     </RoleGuard>
   );
 }

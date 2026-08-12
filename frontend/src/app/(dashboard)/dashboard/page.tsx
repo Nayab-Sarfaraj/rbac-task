@@ -4,7 +4,7 @@ import React from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useDashboardStats } from "@/hooks/use-dashboard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FolderKanban, CheckSquare, Users as UsersIcon, AlertTriangle, Activity } from "lucide-react";
+import { FolderKanban, CheckSquare, Users as UsersIcon, AlertTriangle, Activity, User as UserIcon, Layers } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -21,8 +21,8 @@ export default function DashboardPage() {
           <div className="h-5 w-96 bg-muted rounded mt-2 animate-pulse" />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div className="h-4 w-24 bg-muted rounded" />
@@ -37,7 +37,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Left card skeleton */}
           <Card className="animate-pulse">
             <CardHeader>
               <div className="h-5 w-36 bg-muted rounded" />
@@ -57,7 +56,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Right card skeleton */}
           <Card className="animate-pulse">
             <CardHeader>
               <div className="h-5 w-36 bg-muted rounded" />
@@ -82,16 +80,24 @@ export default function DashboardPage() {
 
   // Calculated Stats
   const totalProjects = stats?.totalProjects || 0;
-  const totalTasks = stats?.totalTasks || 0;
   const totalUsers = stats?.totalUsers || 0;
-
-  const todoTasksCount = stats?.taskStatusSummary?.todo || 0;
-  const inProgressTasksCount = stats?.taskStatusSummary?.in_progress || 0;
-  const doneTasksCount = stats?.taskStatusSummary?.done || 0;
-
-  const overdueTasks = stats?.overdueTasks || [];
-  const upcomingTasks = stats?.upcomingTasks || [];
   const auditLogs = stats?.recentAuditLogs || [];
+
+  // Personal Tasks Stats (Assigned to Me)
+  const personalTotal = stats?.personalTasks?.total || 0;
+  const personalTodo = stats?.personalTasks?.statusSummary?.todo || 0;
+  const personalInProgress = stats?.personalTasks?.statusSummary?.in_progress || 0;
+  const personalDone = stats?.personalTasks?.statusSummary?.done || 0;
+  const personalOverdue = stats?.personalTasks?.overdue || [];
+  const personalUpcoming = stats?.personalTasks?.upcoming || [];
+
+  // Project Tasks Stats (General scope)
+  const projectTotal = stats?.projectTasks?.total || 0;
+  const projectTodo = stats?.projectTasks?.statusSummary?.todo || 0;
+  const projectInProgress = stats?.projectTasks?.statusSummary?.in_progress || 0;
+  const projectDone = stats?.projectTasks?.statusSummary?.done || 0;
+  const projectOverdue = stats?.projectTasks?.overdue || [];
+  const projectUpcoming = stats?.projectTasks?.upcoming || [];
 
   return (
     <div className="space-y-6">
@@ -105,7 +111,7 @@ export default function DashboardPage() {
       {/* ADMIN DASHBOARD WIDGETS */}
       {role === "admin" && (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -116,6 +122,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Registered in the database</p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
@@ -126,17 +133,32 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">System-wide active projects</p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-                <CheckSquare className="size-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Assigned to Me</CardTitle>
+                <UserIcon className="size-4 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalTasks}</div>
+                <div className="text-2xl font-bold">{personalTotal}</div>
                 <div className="text-xs text-muted-foreground flex gap-2 mt-1">
-                  <span className="text-zinc-500 font-semibold">{todoTasksCount} Todo</span>
-                  <span className="text-blue-500 font-semibold">{inProgressTasksCount} In Progress</span>
-                  <span className="text-green-500 font-semibold">{doneTasksCount} Done</span>
+                  <span>{personalInProgress} In Progress</span>
+                  <span>{personalDone} Done</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Workspace Tasks</CardTitle>
+                <Layers className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{projectTotal}</div>
+                <div className="text-xs text-muted-foreground flex gap-2 mt-1">
+                  <span className="text-zinc-500 font-semibold">{projectTodo} Todo</span>
+                  <span className="text-blue-500 font-semibold">{projectInProgress} In Progress</span>
+                  <span className="text-green-500 font-semibold">{projectDone} Done</span>
                 </div>
               </CardContent>
             </Card>
@@ -178,35 +200,35 @@ export default function DashboardPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Task Status Summary</CardTitle>
+                <CardTitle>Workspace Task Breakdown</CardTitle>
                 <CardDescription>Global breakdown of task workflow state</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col justify-center h-48 space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>Todo</span>
-                    <span>{todoTasksCount} / {totalTasks}</span>
+                    <span>{projectTodo} / {projectTotal}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-zinc-400 h-full" style={{ width: `${totalTasks ? (todoTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-zinc-400 h-full" style={{ width: `${projectTotal ? (projectTodo / projectTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>In Progress</span>
-                    <span>{inProgressTasksCount} / {totalTasks}</span>
+                    <span>{projectInProgress} / {projectTotal}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-blue-500 h-full" style={{ width: `${totalTasks ? (inProgressTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-blue-500 h-full" style={{ width: `${projectTotal ? (projectInProgress / projectTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>Done</span>
-                    <span>{doneTasksCount} / {totalTasks}</span>
+                    <span>{projectDone} / {projectTotal}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full" style={{ width: `${totalTasks ? (doneTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-green-500 h-full" style={{ width: `${projectTotal ? (projectDone / projectTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
               </CardContent>
@@ -218,7 +240,7 @@ export default function DashboardPage() {
       {/* MANAGER DASHBOARD WIDGETS */}
       {role === "manager" && (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">My Projects</CardTitle>
@@ -229,25 +251,40 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Owned projects managed by you</p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Team Tasks</CardTitle>
-                <CheckSquare className="size-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Assigned to Me</CardTitle>
+                <UserIcon className="size-4 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalTasks}</div>
+                <div className="text-2xl font-bold">{personalTotal}</div>
                 <p className="text-xs text-muted-foreground">
-                  {inProgressTasksCount} currently active, {doneTasksCount} completed
+                  {personalInProgress} in progress, {personalDone} completed
                 </p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Overdue Items</CardTitle>
+                <CardTitle className="text-sm font-medium">Project Tasks</CardTitle>
+                <Layers className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{projectTotal}</div>
+                <p className="text-xs text-muted-foreground">
+                  {projectInProgress} currently active, {projectDone} completed
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Project Overdue Items</CardTitle>
                 <AlertTriangle className="size-4 text-destructive" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-destructive">{overdueTasks.length}</div>
+                <div className="text-2xl font-bold text-destructive">{projectOverdue.length}</div>
                 <p className="text-xs text-muted-foreground">Tasks past their due date</p>
               </CardContent>
             </Card>
@@ -263,28 +300,28 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>Todo</span>
-                    <span>{todoTasksCount}</span>
+                    <span>{projectTodo}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-zinc-400 h-full" style={{ width: `${totalTasks ? (todoTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-zinc-400 h-full" style={{ width: `${projectTotal ? (projectTodo / projectTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>In Progress</span>
-                    <span>{inProgressTasksCount}</span>
+                    <span>{projectInProgress}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-blue-500 h-full" style={{ width: `${totalTasks ? (inProgressTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-blue-500 h-full" style={{ width: `${projectTotal ? (projectInProgress / projectTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>Done</span>
-                    <span>{doneTasksCount}</span>
+                    <span>{projectDone}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full" style={{ width: `${totalTasks ? (doneTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-green-500 h-full" style={{ width: `${projectTotal ? (projectDone / projectTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
               </CardContent>
@@ -297,8 +334,8 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {overdueTasks.length > 0 ? (
-                    overdueTasks.slice(0, 5).map((t) => (
+                  {projectOverdue.length > 0 ? (
+                    projectOverdue.slice(0, 5).map((t) => (
                       <div key={t._id} className="flex justify-between items-center text-sm border-b border-border pb-2 last:border-0 last:pb-0">
                         <div className="min-w-0">
                           <p className="font-semibold truncate">{t.title}</p>
@@ -322,7 +359,7 @@ export default function DashboardPage() {
       {/* MEMBER DASHBOARD WIDGETS */}
       {role === "member" && (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">My Projects</CardTitle>
@@ -333,26 +370,41 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Projects you have joined</p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">My Tasks</CardTitle>
-                <CheckSquare className="size-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Assigned to Me</CardTitle>
+                <UserIcon className="size-4 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalTasks}</div>
+                <div className="text-2xl font-bold">{personalTotal}</div>
                 <p className="text-xs text-muted-foreground">
-                  {inProgressTasksCount} in progress, {doneTasksCount} completed
+                  {personalInProgress} in progress, {personalDone} completed
                 </p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Overdue Tasks</CardTitle>
+                <CardTitle className="text-sm font-medium">My Overdue Tasks</CardTitle>
                 <AlertTriangle className="size-4 text-destructive" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-destructive">{overdueTasks.length}</div>
+                <div className="text-2xl font-bold text-destructive">{personalOverdue.length}</div>
                 <p className="text-xs text-muted-foreground">Personal tasks past due date</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Workspace Tasks</CardTitle>
+                <Layers className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{projectTotal}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total project tasks you can access
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -367,28 +419,28 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>Todo</span>
-                    <span>{todoTasksCount}</span>
+                    <span>{personalTodo}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-zinc-400 h-full" style={{ width: `${totalTasks ? (todoTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-zinc-400 h-full" style={{ width: `${personalTotal ? (personalTodo / personalTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>In Progress</span>
-                    <span>{inProgressTasksCount}</span>
+                    <span>{personalInProgress}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-blue-500 h-full" style={{ width: `${totalTasks ? (inProgressTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-blue-500 h-full" style={{ width: `${personalTotal ? (personalInProgress / personalTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold">
                     <span>Done</span>
-                    <span>{doneTasksCount}</span>
+                    <span>{personalDone}</span>
                   </div>
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full" style={{ width: `${totalTasks ? (doneTasksCount / totalTasks) * 100 : 0}%` }} />
+                    <div className="bg-green-500 h-full" style={{ width: `${personalTotal ? (personalDone / personalTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
               </CardContent>
@@ -396,13 +448,13 @@ export default function DashboardPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Upcoming Deadlines</CardTitle>
-                <CardDescription>Tasks due in the next 7 days</CardDescription>
+                <CardTitle>My Upcoming Deadlines</CardTitle>
+                <CardDescription>Tasks assigned to you due in the next 7 days</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {upcomingTasks.length > 0 ? (
-                    upcomingTasks.map((t) => (
+                  {personalUpcoming.length > 0 ? (
+                    personalUpcoming.map((t) => (
                       <div key={t._id} className="flex justify-between items-center text-sm border-b border-border pb-2 last:border-0 last:pb-0">
                         <span className="font-medium truncate">{t.title}</span>
                         <span className="text-xs text-muted-foreground font-semibold">

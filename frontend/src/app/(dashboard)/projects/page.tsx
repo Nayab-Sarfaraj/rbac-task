@@ -10,6 +10,7 @@ import {
 } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import {
   Table,
   TableBody,
@@ -58,10 +59,10 @@ export default function ProjectsPage() {
     setNewDescription("");
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this project? This will soft-delete the project.")) {
-      await deleteProjectMutation.mutateAsync(id);
-    }
+  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteProjectId(id);
   };
 
   const isManagerOrAdmin = user?.role === "admin" || user?.role === "manager";
@@ -242,6 +243,21 @@ export default function ProjectsPage() {
           </Button>
         </div>
       )}
+
+      <ConfirmationDialog
+        isOpen={!!deleteProjectId}
+        onClose={() => setDeleteProjectId(null)}
+        onConfirm={async () => {
+          if (deleteProjectId) {
+            await deleteProjectMutation.mutateAsync(deleteProjectId);
+          }
+        }}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This will soft-delete the project."
+        confirmText="Delete"
+        variant="destructive"
+        isPending={deleteProjectMutation.isPending}
+      />
     </div>
   );
 }

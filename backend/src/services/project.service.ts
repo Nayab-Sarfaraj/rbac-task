@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { ProjectRepository } from '../repositories/project.repository';
 import { UserRepository } from '../repositories/user.repository';
 import { auditLogService } from './auditLog.service';
@@ -8,6 +9,13 @@ import {
   BadRequestError,
 } from '../utils/errors';
 import { UserPayload } from '../types/express';
+
+// Safely extract string ID from populated object or raw ObjectId
+function toId(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'object' && '_id' in val) return val._id.toString();
+  return val.toString();
+}
 
 export class ProjectService {
   private projectRepository: ProjectRepository;
@@ -21,13 +29,25 @@ export class ProjectService {
   private verifyProjectAccess(project: IProject, user: UserPayload): void {
     if (user.role === 'admin') return;
 
+    // Owner may be a populated User object or a raw ObjectId
+    const ownerId =
+      project.owner && typeof project.owner === 'object' && '_id' in project.owner
+        ? (project.owner as any)._id.toString()
+        : project.owner.toString();
+
     if (user.role === 'manager') {
-      if (project.owner.toString() !== user.id) {
+      if (ownerId !== user.id) {
         throw new ForbiddenError('Access Denied: You do not own this project');
       }
     } else {
-      // member role
-      const isMember = project.members.some((m) => m.toString() === user.id);
+      // member role — members may be populated User objects or raw ObjectIds
+      const isMember = project.members.some((m: any) => {
+        const memberId =
+          m && typeof m === 'object' && '_id' in m
+            ? m._id.toString()
+            : m.toString();
+        return memberId === user.id;
+      });
       if (!isMember) {
         throw new ForbiddenError('Access Denied: You are not a member of this project');
       }
@@ -42,9 +62,9 @@ export class ProjectService {
     const filter: any = { isDeleted: false };
 
     if (user.role === 'manager') {
-      filter.owner = user.id;
+      filter.owner = new mongoose.Types.ObjectId(user.id);
     } else if (user.role === 'member') {
-      filter.members = user.id;
+      filter.members = new mongoose.Types.ObjectId(user.id);
     }
 
     return this.projectRepository.find(filter, page, limit);
@@ -89,7 +109,7 @@ export class ProjectService {
     }
 
     // Must be owner or admin
-    if (user.role !== 'admin' && project.owner.toString() !== user.id) {
+    if (user.role !== 'admin' && toId(project.owner) !== user.id) {
       throw new ForbiddenError('Access Denied: Only the project owner can update it');
     }
 
@@ -114,7 +134,7 @@ export class ProjectService {
     }
 
     // Must be owner or admin
-    if (user.role !== 'admin' && project.owner.toString() !== user.id) {
+    if (user.role !== 'admin' && toId(project.owner) !== user.id) {
       throw new ForbiddenError('Access Denied: Only the project owner can delete it');
     }
 
@@ -130,11 +150,9 @@ export class ProjectService {
     }
 
     // Must be owner or admin
-    if (user.role !== 'admin' && project.owner.toString() !== user.id) {
+    if (user.role !== 'admin' && toId(project.owner) !== user.id) {
       throw new ForbiddenError('Access Denied: Only the project owner can manage members');
     }
-
-    // Check if target user exists
     const targetUser = await this.userRepository.findById(memberId);
     if (!targetUser || targetUser.isDeleted) {
       throw new NotFoundError('Target user not found');
@@ -161,11 +179,11 @@ export class ProjectService {
     }
 
     // Must be owner or admin
-    if (user.role !== 'admin' && project.owner.toString() !== user.id) {
+    if (user.role !== 'admin' && toId(project.owner) !== user.id) {
       throw new ForbiddenError('Access Denied: Only the project owner can manage members');
     }
 
-    const index = project.members.findIndex((m) => m.toString() === memberId);
+    const index = project.members.findIndex((m) => toId(m) === memberId);
     if (index === -1) {
       throw new BadRequestError('User is not a member of this project');
     }

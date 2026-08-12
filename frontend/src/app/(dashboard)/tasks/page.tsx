@@ -11,6 +11,7 @@ import {
 import { useProject } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import {
   Table,
   TableBody,
@@ -115,11 +116,11 @@ export default function TasksPage() {
     await updateStatusMutation.mutateAsync({ id: taskId, status: newStatus });
   };
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
+
+  const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this task?")) {
-      await deleteTaskMutation.mutateAsync(id);
-    }
+    setDeleteTaskId(id);
   };
 
   const tasks = data?.tasks || [];
@@ -434,6 +435,21 @@ export default function TasksPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog
+        isOpen={!!deleteTaskId}
+        onClose={() => setDeleteTaskId(null)}
+        onConfirm={async () => {
+          if (deleteTaskId) {
+            await deleteTaskMutation.mutateAsync(deleteTaskId);
+          }
+        }}
+        title="Delete Task"
+        description="Are you sure you want to delete this task?"
+        confirmText="Delete"
+        variant="destructive"
+        isPending={deleteTaskMutation.isPending}
+      />
     </div>
   );
 }

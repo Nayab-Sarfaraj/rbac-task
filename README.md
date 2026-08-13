@@ -236,7 +236,25 @@ NEXT_PUBLIC_API_URL=http://localhost:3001/api
 
 ### Initial Setup
 
-After starting the application:
+After starting the application, you have two options:
+
+**Option 1: Use Seeded Test Accounts** (Recommended for development)
+
+Run the seed script to populate the database with test users:
+
+```bash
+npm run seed
+```
+
+This creates three test accounts with password `Password123`:
+
+| Email                 | Role    | Password    |
+| --------------------- | ------- | ----------- |
+| `admin@example.com`   | Admin   | Password123 |
+| `manager@example.com` | Manager | Password123 |
+| `member@example.com`  | Member  | Password123 |
+
+**Option 2: Manual Setup**
 
 1. Register a new account at `/register`
 2. First user can be manually promoted to Admin in MongoDB

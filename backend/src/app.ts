@@ -19,12 +19,27 @@ const app = express();
 
 // Security and utility middlewares
 app.use(helmet());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://rbac-task.vercel.app',
+];
+
 app.use(
   cors({
-    origin: [
-      'http://localhost:3000',
-      'https://rbac-task.vercel.app',
-    ],
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      const isAllowed = allowedOrigins.includes(origin) || 
+        origin.endsWith('.vercel.app') || 
+        /^http:\/\/localhost:\d+$/.test(origin);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(null, false); // Block CORS
+      }
+    },
     credentials: true,
   })
 );

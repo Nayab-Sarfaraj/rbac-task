@@ -309,8 +309,6 @@ All API responses follow this format:
 - **Audit Logs** (`/api/audit-logs`) - Admin only
   - `GET /` - List audit logs
 
-For detailed API route specifications, see [backend/requirements.md](backend/requirements.md).
-
 ## 🗄️ Database Schema
 
 ### Collections
@@ -345,8 +343,6 @@ For detailed API route specifications, see [backend/requirements.md](backend/req
 - Target type and ID
 - Metadata (before/after values)
 - Created timestamp (immutable)
-
-For comprehensive schema details, see [backend/requirements.md](backend/requirements.md).
 
 ## 🏗️ Project Architecture
 
@@ -442,10 +438,7 @@ npm run lint         # Run ESLint
 
 ## 📖 Additional Resources
 
-- [Backend Requirements](backend/requirements.md) - API routes and database schema
-- [Frontend Requirements](frontend/requirements.md) - Pages and UI functionality
-- [Backend Claude Notes](backend/claude.md)
-- [Frontend Claude Notes](frontend/CLAUDE.md)
+No additional documentation files at this time.
 
 ## 🤝 Contributing
 

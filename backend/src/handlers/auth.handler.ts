@@ -30,7 +30,7 @@ export class AuthHandler {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'strict',
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matching env default)
       });
 
@@ -50,10 +50,11 @@ export class AuthHandler {
 
   async logout(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const isProduction = env.NODE_ENV === 'production';
       res.clearCookie('refreshToken', {
         httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
       });
       successResponse(res, 200, 'Logout successful', null);
     } catch (error) {

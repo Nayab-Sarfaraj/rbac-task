@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userData);
     if (typeof window !== "undefined") {
       localStorage.setItem("user_name", userData.name);
+      document.cookie = "is_logged_in=true; path=/; max-age=604800; SameSite=Lax";
     }
   };
 
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       if (typeof window !== "undefined") {
         localStorage.removeItem("user_name");
+        document.cookie = "is_logged_in=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
       router.push("/login");
     }
@@ -65,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       let storedName = "";
       if (typeof window !== "undefined") {
         storedName = localStorage.getItem("user_name") || "";
+        document.cookie = "is_logged_in=true; path=/; max-age=604800; SameSite=Lax";
       }
 
       setUser({
@@ -75,6 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       return true;
     } catch {
+      if (typeof window !== "undefined") {
+        document.cookie = "is_logged_in=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      }
       return false;
     }
   };
@@ -91,6 +97,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const handleLogoutEvent = () => {
       setAccessToken(null);
       setUser(null);
+      if (typeof window !== "undefined") {
+        document.cookie = "is_logged_in=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      }
       router.push("/login");
     };
 

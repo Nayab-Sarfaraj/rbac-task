@@ -5,18 +5,18 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
-  const hasRefreshToken = request.cookies.has("refreshToken");
+  const isLoggedIn = request.cookies.has("is_logged_in");
 
-  // If trying to access protected routes without a refresh token
-  if (!isAuthPage && !hasRefreshToken) {
+  // If trying to access protected routes without being logged in
+  if (!isAuthPage && !isLoggedIn) {
     const loginUrl = new URL("/login", request.url);
     // Remember original destination
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // If trying to access auth pages with a refresh token, redirect to dashboard
-  if (isAuthPage && hasRefreshToken) {
+  // If trying to access auth pages when already logged in, redirect to dashboard
+  if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

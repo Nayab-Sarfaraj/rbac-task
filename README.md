@@ -456,7 +456,7 @@ npm run lint         # Run ESLint
 
 ## 📖 Additional Resources
 
-No additional documentation files at this time.
+No additional documentation files at this time
 
 ## 🤝 Contributing
 
